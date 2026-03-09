@@ -1,85 +1,76 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soulgram</title>
-    <link rel="stylesheet" href="style.css">
+<title>Soulgram</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+font-family:Arial;
+background:#f4f4f4;
+padding:20px;
+}
+
+textarea{
+width:100%;
+height:80px;
+font-size:16px;
+}
+
+button{
+padding:10px 20px;
+margin-top:10px;
+font-size:16px;
+}
+
+#debug{
+margin-top:10px;
+color:#333;
+}
+</style>
+
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>Soulgram™</h1>
-            <p style="margin-top:-5px; color:#777; font-size:14px;">
-                Reflect. Connect. Grow.
-            </p>
-            <p style="color:#999; font-size:12px;">
-                © 2026 Giselle Sierra Pérez
-            </p>
-        </header>
 
-        <main>
-            <div class="post-box">
-                <textarea id="reflection-input" placeholder="Escribe tu reflexión aquí..."></textarea>
-                <button id="post-btn">Post</button>
-            </div>
+<h1>❤️ Soulgram</h1>
 
-            <div id="feed">
-                <!-- Aquí aparecerán las reflexiones -->
-            </div>
-        </main>
-    </div>
+<textarea id="reflection" placeholder="Write something..."></textarea>
+<br>
+<button onclick="postReflection()">Post</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script>
-        // Configuración de Supabase
-        const supabaseUrl = 'https://tsjijeklkzydjfbbrvtr.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzamlqZWtsa3p5ZGpmYmJydnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODUxNzQsImV4cCI6MjA4ODU2MTE3NH0.jqeSC4CxDyBOxrpJCbPM-KqY78NbPPI0SjX06SJEOkM';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+<p id="debug"></p>
 
-        const postBtn = document.getElementById('post-btn');
-        const input = document.getElementById('reflection-input');
-        const feed = document.getElementById('feed');
+<script>
 
-        // Función para postear la reflexión
-        postBtn.addEventListener('click', async () => {
-            const content = input.value.trim();
-            if (!content) return;
+const supabaseUrl = "https://tsjijeklkzydjfbbrvtr.supabase.co"
 
-            const { data, error } = await supabase
-                .from('Soulgram')
-                .insert([{ content }]);
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzamlqZWtsa3p5ZGpmYmJydnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODUxNzQsImV4cCI6MjA4ODU2MTE3NH0.jqeSC4CxDyBOxrpJCbPM-KqY78NbPPI0SjX06SJEOkM"
 
-            if (error) {
-                console.error(error);
-            } else {
-                input.value = '';
-                loadFeed();
-            }
-        });
+const { createClient } = supabase
+const client = createClient(supabaseUrl, supabaseKey)
 
-        // Función para cargar el feed de reflexiones
-        async function loadFeed() {
-            const { data, error } = await supabase
-                .from('Soulgram')
-                .select('*')
-                .order('created_at', { ascending: false });
+async function postReflection(){
 
-            if (error) {
-                console.error(error);
-            } else {
-                feed.innerHTML = '';
-                data.forEach(post => {
-                    const div = document.createElement('div');
-                    div.className = 'post';
-                    div.textContent = post.content;
-                    feed.appendChild(div);
-                });
-            }
-        }
+document.getElementById("debug").innerText="Posting..."
 
-        // Carga inicial del feed
-        loadFeed();
-    </script>
+let text = document.getElementById("reflection").value
+
+const { error } = await client
+.from("Soulgram")
+.insert({ content: text })
+
+if(error){
+document.getElementById("debug").innerText = error.message
+}else{
+document.getElementById("debug").innerText = "Posted successfully ✅"
+document.getElementById("reflection").value=""
+}
+
+}
+
+</script>
+
 </body>
 </html>
