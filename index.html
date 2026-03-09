@@ -1,173 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Soulgram - A reflection-based social platform focused on meaningful communication and emotional awareness">
-    <meta name="theme-color" content="#2D3E50">
-    <title>Soulgram™ - Mindful Social Network</title>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-
-    <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f9f9f9; margin: 0; }
-        .navbar { background: #2D3E50; color: #fff; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-logo { margin: 0; font-size: 1.2rem; }
-        .nav-btn { background: none; border: none; color: #fff; font-size: 1.2rem; margin-left: 10px; cursor: pointer; }
-        .container { padding: 15px; }
-        .soul-drop-card, .post-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 15px; margin-bottom: 15px; }
-        .post-card h4 { margin: 0 0 5px 0; font-size: 1rem; }
-        .post-card p { margin: 0; color: #333; }
-        .reaction-btn { background: none; border: none; font-size: 1.2rem; margin-right: 5px; cursor: pointer; }
-        .screen { display: none; }
-        .active-screen { display: block; }
-        .tab-btn { padding: 8px 12px; margin-right: 5px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; background: #fff; }
-        .tab-btn.active { background: #2D3E50; color: #fff; border-color: #2D3E50; }
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; }
-        .modal-content { background:#fff; padding:20px; border-radius:10px; width:90%; max-width:400px; }
-        .modal-close { background:none; border:none; font-size:1.5rem; float:right; cursor:pointer; }
-    </style>
+    <title>Soulgram</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen">
-        <h1>Soulgram™</h1>
-        <p>Loading your mindful space...</p>
+    <div class="container">
+        <header>
+            <h1>Soulgram™</h1>
+            <p style="margin-top:-5px; color:#777; font-size:14px;">
+                Reflect. Connect. Grow.
+            </p>
+            <p style="color:#999; font-size:12px;">
+                © 2026 Giselle Sierra Pérez
+            </p>
+        </header>
+
+        <main>
+            <div class="post-box">
+                <textarea id="reflection-input" placeholder="Escribe tu reflexión aquí..."></textarea>
+                <button id="post-btn">Post</button>
+            </div>
+
+            <div id="feed">
+                <!-- Aquí aparecerán las reflexiones -->
+            </div>
+        </main>
     </div>
 
-    <!-- Main App -->
-    <div id="mainApp" style="display:none;">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <h1 class="nav-logo">Soulgram™</h1>
-            <div>
-                <button class="nav-btn" onclick="showScreen('feed')"><i class="fas fa-home"></i></button>
-                <button class="nav-btn" onclick="showScreen('explore')"><i class="fas fa-compass"></i></button>
-                <button class="nav-btn" onclick="showScreen('profile')"><i class="fas fa-user"></i></button>
-            </div>
-        </nav>
-
-        <!-- Feed Screen -->
-        <div id="feedScreen" class="screen active-screen">
-            <div class="container">
-                <h2>Your Reflections</h2>
-                <div id="soulDropCard" class="soul-drop-card">
-                    <h3>Daily Soul Drop</h3>
-                    <p id="dailyPrompt">Loading...</p>
-                </div>
-                <div id="feedContainer"></div>
-            </div>
-        </div>
-
-        <!-- Explore Screen -->
-        <div id="exploreScreen" class="screen">
-            <div class="container">
-                <h2>Explore</h2>
-                <div>
-                    <button class="tab-btn active" onclick="showExploreTab('challenges')">Creative Challenges</button>
-                    <button class="tab-btn" onclick="showExploreTab('tests')">Self Discovery</button>
-                </div>
-                <div id="exploreContent"></div>
-            </div>
-        </div>
-
-        <!-- Profile Screen -->
-        <div id="profileScreen" class="screen">
-            <div class="container">
-                <h2>Profile</h2>
-                <div id="profileInfo">
-                    <p id="profileDisplayName">User Name</p>
-                    <p id="profileUsername">@username</p>
-                    <button onclick="openEditProfile()">Edit Profile</button>
-                </div>
-                <div id="profilePosts"></div>
-            </div>
-        </div>
-
-        <!-- Edit Profile Modal -->
-        <div id="editProfileModal" class="modal">
-            <div class="modal-content">
-                <button class="modal-close" onclick="closeEditProfile()">&times;</button>
-                <h3>Edit Profile</h3>
-                <form id="editProfileForm" onsubmit="handleEditProfile(event)">
-                    <input type="text" id="editDisplayName" placeholder="Display Name" required><br><br>
-                    <input type="text" id="editBio" placeholder="Bio"><br><br>
-                    <input type="url" id="editProfileImage" placeholder="Profile Image URL"><br><br>
-                    <button type="submit">Save</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        const supabaseUrl = "https://tsjijeklkzydjfbbrvtr.supabase.co";
-        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzamlqZWtsa3p5ZGpmYmJydnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODUxNzQsImV4cCI6MjA4ODU2MTE3NH0.jqeSC4CxDyBOxrpJCbPM-KqY78NbPPI0SjX06SJEOkM";
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        // Configuración de Supabase
+        const supabaseUrl = 'https://tsjijeklkzydjfbbrvtr.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzamlqZWtsa3p5ZGpmYmJydnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODUxNzQsImV4cCI6MjA4ODU2MTE3NH0.jqeSC4CxDyBOxrpJCbPM-KqY78NbPPI0SjX06SJEOkM';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function loadPosts() {
-            const { data, error } = await supabase.from('Soulgram').select('*').order('created_at', { ascending: false });
-            if(error) { console.error(error); return; }
-            const feed = document.getElementById("feedContainer");
-            feed.innerHTML = '';
-            data.forEach(post => {
-                const div = document.createElement('div');
-                div.className = 'post-card';
-                div.innerHTML = `
-                    <h4>${post.display_name || 'Anonymous'}</h4>
-                    <p>${post.content}</p>
-                    <div>
-                        <button class="reaction-btn">♥️</button>
-                        <button class="reaction-btn">🥰</button>
-                        <button class="reaction-btn">🤩</button>
-                        <button class="reaction-btn">😂</button>
-                        <button class="reaction-btn">😁</button>
-                        <button class="reaction-btn">😝</button>
-                        <button class="reaction-btn">🥲</button>
-                        <button class="reaction-btn">🥹</button>
-                        <button class="reaction-btn">😱</button>
-                    </div>
-                `;
-                feed.appendChild(div);
-            });
-        }
+        const postBtn = document.getElementById('post-btn');
+        const input = document.getElementById('reflection-input');
+        const feed = document.getElementById('feed');
 
-        function showScreen(screen) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.getElementById(screen + 'Screen').classList.add('active-screen');
-        }
+        // Función para postear la reflexión
+        postBtn.addEventListener('click', async () => {
+            const content = input.value.trim();
+            if (!content) return;
 
-        function showExploreTab(tab) {
-            const content = document.getElementById('exploreContent');
-            if(tab === 'challenges') {
-                content.innerHTML = '<p>Challenge 1, Challenge 2...</p>';
+            const { data, error } = await supabase
+                .from('Soulgram')
+                .insert([{ content }]);
+
+            if (error) {
+                console.error(error);
             } else {
-                content.innerHTML = '<p>Test 1, Test 2...</p>';
+                input.value = '';
+                loadFeed();
             }
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+        });
+
+        // Función para cargar el feed de reflexiones
+        async function loadFeed() {
+            const { data, error } = await supabase
+                .from('Soulgram')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error(error);
+            } else {
+                feed.innerHTML = '';
+                data.forEach(post => {
+                    const div = document.createElement('div');
+                    div.className = 'post';
+                    div.textContent = post.content;
+                    feed.appendChild(div);
+                });
+            }
         }
 
-        function openEditProfile() { document.getElementById('editProfileModal').style.display = 'flex'; }
-        function closeEditProfile() { document.getElementById('editProfileModal').style.display = 'none'; }
-        function handleEditProfile(e){ e.preventDefault(); alert('Profile updated!'); closeEditProfile(); }
-
-        window.addEventListener('load', () => {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            loadPosts();
-        });
+        // Carga inicial del feed
+        loadFeed();
     </script>
 </body>
 </html>
